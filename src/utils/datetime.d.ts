@@ -1,0 +1,1 @@
+export function normalizeMysqlDateTime(value: unknown): string

@@ -8,13 +8,23 @@
         </div>
       </template>
 
-      <el-table :data="tableData" style="width:100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="名称" />
+      <el-table :data="tableData" style="width:100%" v-loading="loading" >
+<!--        <el-table-column  label="ID" width="80" >-->
+<!--          <template #default="{ $index }">-->
+<!--            {{ (currentPage - 1) * pageSize + $index + 1 }}-->
+<!--          </template>-->
+<!--        </el-table-column>-->
+
+        <el-table-column type="index" label="ID" />
+        <el-table-column prop="name" label="名称" >
+          <template #default="scope">
+            <span :style="scope.row.stock<=0? 'color:#f56c6c;font-weight:bold':''">{{ scope.row.name }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="price_points" label="积分" width="100" />
         <el-table-column prop="stock" label="库存" width="100">
           <template #default="scope">
-            <span :style="scope.row.stock<=0? 'color:#f56c6c':''">{{ scope.row.stock }}</span>
+            <span :style="scope.row.stock<=0? 'color:#f56c6c;font-weight:bold':''">{{ scope.row.stock }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="240" fixed="right">
@@ -83,7 +93,20 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const submitLoading = ref(false)
 
+interface Product {
+  name: string
+  price_points: number
+  stock: number
+}
+
 const form = reactive({ id: null, name: '', description: '', image_url: '', price_points: 0, stock: 0, category: 'goods' })
+
+const tableRowClassName = ({row, rowIndex}:{row:Product,rowIndex:number}) => {
+  if (row.stock === 0) {
+    return 'warning-row'
+  }
+  return ''
+}
 
 const rules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -223,6 +246,7 @@ onMounted(() => { fetchData() })
   overflow: hidden;
   cursor: pointer;
   background: var(--el-fill-color-lighter);
+
 }
 
 .image-preview {
@@ -250,5 +274,9 @@ onMounted(() => { fetchData() })
 .hint {
   color: #999;
   font-size: 12px;
+}
+
+:deep(.el-table .warning-row){
+  --el-table-tr-bg-color: var(--el-color-error-light-3);
 }
 </style>

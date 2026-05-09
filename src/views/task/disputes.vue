@@ -17,8 +17,12 @@
         </div>
       </template>
 
-      <el-table :data="tableData" style="width: 100%" border v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
+      <el-table :data="tableData" style="width: 100%"  v-loading="loading" :row-class-name=tableRowClassName>
+        <el-table-column  label="ID" width="80" >
+          <template #default="{ $index }">
+            {{ (currentPage - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column prop="task_title" label="任务标题" width="220" show-overflow-tooltip />
         <el-table-column prop="reason" label="纠纷原因" show-overflow-tooltip />
         <el-table-column prop="reporter_name" label="发起人" width="120" />
@@ -133,6 +137,7 @@ const searchForm = reactive({
   search: ''
 })
 
+
 const detailVisible = ref(false)
 const detailLoading = ref(false)
 const detail = ref<any>({})
@@ -148,7 +153,12 @@ const resolveForm = reactive({
   task_action: 'no_change',
   resolution: ''
 })
-
+const tableRowClassName = ({row, rowIndex}:{row:DisputeRow,rowIndex:number}) => {
+  if (row.status === 'pending') {
+    return 'warning-row'
+  }
+  return ''
+}
 const rejectForm = reactive({
   resolution: ''
 })
@@ -278,5 +288,10 @@ onMounted(fetchData)
   display: flex;
   justify-content: flex-end;
 }
+
+:deep(.el-table .warning-row){
+  --el-table-tr-bg-color: var(--el-color-error-light-3);
+}
+
 </style>
 

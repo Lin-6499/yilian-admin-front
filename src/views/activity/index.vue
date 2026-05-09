@@ -13,7 +13,11 @@
       </template>
 
       <el-table :data="tableData" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column  label="ID" width="80" >
+          <template #default="{ $index }">
+            {{ (currentPage - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="标题" width="220" />
         <el-table-column prop="location" label="地点" width="180" />
         <el-table-column prop="start_time" label="开始时间" width="180">
@@ -142,6 +146,14 @@
     end_time: [{ required: true, message: '请选择结束时间', trigger: 'change' }]
   })
 
+  const toRelativeUrl = (url: string): string => {
+    if (!url) return ''
+    // 如果已经是相对路径，直接返回
+    if (url.startsWith('/uploads/')) return url
+    // 移除域名部分
+    return url.replace(/^https?:\/\/[^/]+/, '')
+  }
+
   const beforePosterUpload = (file: File) => {
     const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
     if (!allowedTypes.has(file.type)) {
@@ -187,7 +199,7 @@
       return
     }
 
-    form.image_url = uploadedUrl
+    form.image_url = toRelativeUrl(uploadedUrl)
     ElMessage.success('海报上传成功')
   }
 
@@ -222,7 +234,8 @@
     Object.assign(form, {
       ...row,
       start_time: normalizeMysqlDateTime(row.start_time),
-      end_time: normalizeMysqlDateTime(row.end_time)
+      end_time: normalizeMysqlDateTime(row.end_time),
+      image_url: toRelativeUrl(row.image_url)
     })
     dialogVisible.value = true
     nextTick(() => formRef.value?.clearValidate())

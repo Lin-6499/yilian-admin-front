@@ -17,7 +17,11 @@
       </template>
 
       <el-table :data="tableData" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column  label="ID" width="80" >
+          <template #default="{ $index }">
+            {{ (currentPage - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column label="作者" width="180">
           <template #default="{ row }">
             <div class="author-cell">

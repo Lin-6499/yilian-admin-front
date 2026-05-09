@@ -5,10 +5,20 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   server: {
+    host: "0.0.0.0",
+    port: 3101, // 强制指定端口
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true
+        target: 'https://43.138.138.136:3100', // 注意 https
+        changeOrigin: true,
+        secure: false,   // 忽略自签名证书错误
+        // rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/upload': {        // 新增对 /uploads 的代理
+        target: 'https://43.138.138.136:3100',
+        changeOrigin: true,
+        secure: false
+        // 不需要 rewrite，保留 /uploads 路径
       }
     }
   }

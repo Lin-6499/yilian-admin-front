@@ -37,7 +37,11 @@
       </el-form>
 
       <el-table :data="tableData" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column  label="ID" width="80" >
+          <template #default="{ $index }">
+            {{ (currentPage - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column prop="user_id" label="用户ID" width="90" />
         <el-table-column prop="username" label="用户名" width="140" />
         <el-table-column prop="role" label="角色" width="100" />

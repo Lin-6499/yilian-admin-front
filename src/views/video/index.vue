@@ -13,14 +13,14 @@
           <el-input v-model="searchForm.search" placeholder="标题 / 描述 / 标签" />
         </el-form-item>
         <el-form-item label="分类">
-          <el-select v-model="searchForm.category" placeholder="请选择分类" clearable>
+          <el-select style="width: 100px" v-model="searchForm.category" placeholder="请选择分类" clearable>
             <el-option label="养生" value="yangsheng" />
             <el-option label="戏曲" value="xiqu" />
             <el-option label="法律常识" value="legal" />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+          <el-select style="width: 100px"  v-model="searchForm.status" placeholder="请选择状态" clearable>
             <el-option label="已发布" value="published" />
             <el-option label="隐藏" value="hidden" />
           </el-select>
@@ -32,7 +32,11 @@
       </el-form>
 
       <el-table :data="tableData" v-loading="loading" style="width: 100%">
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column  label="ID" width="80" >
+          <template #default="{ $index }">
+            {{ (currentPage - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="标题" min-width="220" show-overflow-tooltip />
         <el-table-column prop="category" label="分类" width="120">
           <template #default="{ row }">

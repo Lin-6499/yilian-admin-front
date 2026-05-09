@@ -14,9 +14,10 @@
           <el-input v-model="searchForm.search" placeholder="请输入用户名或姓名"></el-input>
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="searchForm.role" placeholder="请选择角色" clearable>
+          <el-select style="width: 100px" v-model="searchForm.role" placeholder="请选择角色" clearable>
             <el-option label="管理员" value="admin"></el-option>
-            <el-option label="普通用户" value="user"></el-option>
+            <el-option label="家属" value="family"></el-option>
+            <el-option label="老人" value="elderly"></el-option>
             <el-option label="志愿者" value="volunteer"></el-option>
           </el-select>
         </el-form-item>
@@ -28,7 +29,11 @@
 
       <!-- User Table -->
       <el-table :data="tableData" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column  label="ID" width="80" >
+          <template #default="{ $index }">
+            {{ (currentPage - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column prop="username" label="用户名" width="180" />
         <el-table-column prop="real_name" label="真实姓名" width="180" />
         <el-table-column prop="role" label="角色">

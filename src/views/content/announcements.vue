@@ -13,7 +13,7 @@
           <el-input v-model="searchForm.search" placeholder="请输入标题关键字" />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+          <el-select style="width: 100px" v-model="searchForm.status" placeholder="请选择状态" clearable>
             <el-option label="已发布" value="published" />
             <el-option label="草稿" value="draft" />
           </el-select>
@@ -25,7 +25,11 @@
       </el-form>
 
       <el-table :data="tableData" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column  label="ID" width="80" >
+          <template #default="{ $index }">
+            {{ (currentPage - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="标题" min-width="260" show-overflow-tooltip />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">

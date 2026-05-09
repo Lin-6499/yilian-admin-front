@@ -9,7 +9,7 @@
 
       <el-form :inline="true" :model="searchForm" class="demo-form-inline">
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+          <el-select style="width: 100px"  v-model="searchForm.status" placeholder="请选择状态" clearable>
             <el-option label="待处理" value="pending" />
             <el-option label="已处理/等待领取" value="shipped" />
             <el-option label="已完成" value="completed" />
@@ -23,7 +23,11 @@
       </el-form>
 
       <el-table :data="tableData" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column  label="ID" width="80" >
+          <template #default="{ $index }">
+            {{ (currentPage - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column prop="username" label="用户名" width="150" />
         <el-table-column prop="product_name" label="商品" width="220">
           <template #default="scope">

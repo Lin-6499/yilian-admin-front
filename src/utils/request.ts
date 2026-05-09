@@ -2,7 +2,7 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
 const service = axios.create({
-  baseURL: 'http://localhost:3001/api', // Backend API server address
+  baseURL: '/api', // Backend API server address
   timeout: 5000
 })
 

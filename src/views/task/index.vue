@@ -19,8 +19,12 @@
         </div>
       </template>
 
-      <el-table :data="tasks" style="width: 100%" border v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
+      <el-table :data="tasks" style="width: 100%"  v-loading="loading">
+        <el-table-column  label="ID" width="80" >
+          <template #default="{ $index }">
+            {{ (currentPage - 1) * pageSize + $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="任务标题" width="200" show-overflow-tooltip />
         <el-table-column prop="publisher_name" label="发布者" width="120" />
         <el-table-column prop="volunteer_name" label="接单者" width="120" />

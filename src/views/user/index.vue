@@ -36,6 +36,20 @@
         </el-table-column>
         <el-table-column prop="username" label="用户名" width="180" />
         <el-table-column prop="real_name" label="真实姓名" width="180" />
+        <el-table-column prop="avatar" label="头像" width="180" >
+          <template #default="scope">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:48px;height:48px;background:#f5f7fa;border-radius:4px;overflow:hidden">
+                <img
+                    v-if="scope.row.avatar"
+                    :src="getThumbUrl(scope.row.avatar)"
+                    style="width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.15s"
+                    @load="e => e.target.style.opacity = 1"
+                />
+              </div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="role" label="角色">
           <template #default="scope">
             <el-tag :type="getRoleTag(scope.row.role)">
@@ -102,6 +116,26 @@
         <el-form-item label="真实姓名" prop="real_name">
           <el-input v-model="userForm.real_name" placeholder="请输入真实姓名"></el-input>
         </el-form-item>
+        <el-form-item label="头像" prop="avatar">
+          <div class="image-upload">
+            <el-upload
+                class="image-uploader"
+                name="file"
+                accept=".jpg,.jpeg,.png,.gif,.webp"
+                :show-file-list="false"
+                :before-upload="beforeImageUpload"
+                :http-request="handleImageUploadRequest"
+                :on-success="handleImageUploadSuccess"
+            >
+              <img v-if="userForm.avatar" :src="getThumbUrl(userForm.avatar)" class="image-preview" alt="头像图片预览" />
+              <div v-else class="image-placeholder">
+                <el-icon class="image-placeholder__icon"><Plus /></el-icon>
+                <span>上传图片</span>
+              </div>
+            </el-upload>
+            <div class="hint">支持 JPG / PNG / GIF / WebP，大小不超过 5MB</div>
+          </div>
+        </el-form-item>
         <el-form-item label="联系电话" prop="phone">
           <el-input v-model="userForm.phone" placeholder="请输入联系电话"></el-input>
         </el-form-item>
@@ -135,6 +169,9 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import { getUsers, deleteUser, createUser, updateUser } from '../../api/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import service from "../../utils/request.ts";
+import {getThumbUrl} from "../../utils/thumbUrl.ts";
+
 
 const loading = ref(false)
 const tableData = ref([])
@@ -154,6 +191,7 @@ const userForm = reactive({
   username: '',
   password: '',
   real_name: '',
+  avatar:'',
   phone: '',
   emergency_contact: '',
   emergency_phone: '',
@@ -170,6 +208,56 @@ const searchForm = reactive({
   search: '',
   role: ''
 })
+
+const beforeImageUpload = (file: File) => {
+  const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
+  if (!allowedTypes.has(file.type)) {
+    ElMessage.error('商品图片只能上传 JPG、PNG、GIF 或 WebP 图片')
+    return false
+  }
+
+  if (file.size / 1024 / 1024 > 5) {
+    ElMessage.error('商品图片不能超过 5MB')
+    return false
+  }
+
+  return true
+}
+
+const handleImageUploadRequest = async (options: any) => {
+  const formData = new FormData()
+  formData.append(options.filename || 'file', options.file)
+
+  try {
+    const response: any = await service.post('/admin/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          options.onProgress?.({
+            percent: Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          })
+        }
+      }
+    })
+
+    options.onSuccess?.(response)
+  } catch (error) {
+    options.onError?.(error)
+    throw error
+  }
+}
+
+const handleImageUploadSuccess = (response: any) => {
+  const uploadedUrl = response?.url || response?.data?.url
+  if (!uploadedUrl) {
+    return
+  }
+
+  userForm.avatar = uploadedUrl
+  ElMessage.success('商品图片上传成功')
+}
+
+
 
 const getRoleTag = (role: string) => {
   switch (role) {
@@ -264,6 +352,7 @@ const handleEdit = (row: any) => {
   userForm.password = '' // Don't show password
   userForm.real_name = row.real_name
   userForm.phone = row.phone
+  userForm.avatar = row.avatar
   userForm.emergency_contact = row.emergency_contact || ''
   userForm.emergency_phone = row.emergency_phone || ''
   userForm.role = row.role
@@ -350,5 +439,28 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+.image-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.image-uploader :deep(.el-upload) {
+  width: 180px;
+  height: 180px;
+  border: 1px dashed var(--el-border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--el-fill-color-lighter);
+
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 </style>

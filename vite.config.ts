@@ -14,7 +14,7 @@ export default defineConfig({
         secure: false,   // 忽略自签名证书错误
         // rewrite: (path) => path.replace(/^\/api/, '')
       },
-      '/upload': {        // 新增对 /uploads 的代理
+      '/uploads': {        // 新增对 /uploads 的代理
         target: 'https://43.138.138.136:3100',
         changeOrigin: true,
         secure: false

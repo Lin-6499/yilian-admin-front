@@ -58,7 +58,7 @@
               :http-request="handleImageUploadRequest"
               :on-success="handleImageUploadSuccess"
             >
-              <img v-if="form.image_url" :src="form.image_url" class="image-preview" alt="商品图片预览" />
+              <img v-if="form.image_url" :src="getThumbUrl(form.image_url)" class="image-preview" alt="商品图片预览" />
               <div v-else class="image-placeholder">
                 <el-icon class="image-placeholder__icon"><Plus /></el-icon>
                 <span>上传图片</span>
@@ -83,8 +83,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import { getAdminProducts, createAdminProduct, updateAdminProduct, deleteAdminProduct } from '../../api/products'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
 import service from '../../utils/request'
+import {getThumbUrl} from "../../utils/thumbUrl.ts";
 
 const loading = ref(false)
 const tableData = ref<any[]>([])
@@ -107,6 +107,8 @@ const tableRowClassName = ({row, rowIndex}:{row:Product,rowIndex:number}) => {
   }
   return ''
 }
+
+
 
 const rules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],

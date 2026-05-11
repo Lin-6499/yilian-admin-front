@@ -82,7 +82,7 @@
               :http-request="handlePosterUploadRequest"
               :on-success="handlePosterUploadSuccess"
             >
-              <img v-if="form.image_url" :src="form.image_url" class="poster-preview" alt="海报预览" />
+              <img v-if="form.image_url" :src="getThumbUrl(form.image_url)" class="poster-preview" alt="海报预览" />
               <div v-else class="poster-placeholder">
                 <el-icon class="poster-placeholder__icon"><Plus /></el-icon>
                 <span>上传海报</span>
@@ -112,6 +112,7 @@
   import type { FormInstance, FormRules } from 'element-plus'
   import { Plus } from '@element-plus/icons-vue'
   import service from '../../utils/request'
+  import {getThumbUrl} from "../../utils/thumbUrl.ts";
   import { normalizeMysqlDateTime } from '../../utils/datetime'
 
   const loading = ref(false)

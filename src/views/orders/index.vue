@@ -32,7 +32,14 @@
         <el-table-column prop="product_name" label="商品" width="220">
           <template #default="scope">
             <div style="display:flex;align-items:center;gap:8px">
-              <img v-if="scope.row.product_image" :src="scope.row.product_image" style="width:48px;height:48px;object-fit:cover;border-radius:4px" />
+              <div style="width:48px;height:48px;background:#f5f7fa;border-radius:4px;overflow:hidden">
+                <img
+                    v-if="scope.row.product_image"
+                    :src="getThumbUrl(scope.row.product_image)"
+                    style="width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.15s"
+                    @load="e => e.target.style.opacity = 1"
+                />
+              </div>
               <span>{{ scope.row.product_name }}</span>
             </div>
           </template>
@@ -93,6 +100,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { getOrders, updateOrderStatus } from '../../api/orders'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {getThumbUrl} from "../../utils/thumbUrl.ts";
 
 const loading = ref(false)
 const tableData = ref<any[]>([])
@@ -106,16 +114,46 @@ const detailVisible = ref(false)
 const currentOrder = ref<any>(null)
 const adminNote = ref('')
 
+
+
+const preloadImageWithTimeout = (url, timeout = 7000) => {
+  return Promise.race([
+    new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(url);
+      img.onerror = () => resolve(url);
+      img.src = url;
+    }),
+    new Promise((resolve) => setTimeout(() => resolve(url), timeout))
+  ]);
+};
+
+// 新增批量预加载函数
+const preloadImages = async (urls, timeout = 5000) => {
+  // 去重、过滤无效 URL
+  const validUrls = [...new Set(urls.filter(url => url && typeof url === 'string'))];
+  if (validUrls.length === 0) return;
+
+  // 并发加载所有图片，每张图片独立超时
+  const promises = validUrls.map(url => preloadImageWithTimeout(url, timeout));
+  await Promise.all(promises);
+};
+
 const fetchData = async () => {
   loading.value = true
   try {
-    const res: any = await getOrders({ status: searchForm.status, page: currentPage.value, limit: pageSize.value })
-    tableData.value = res.orders || []
-    total.value = (res.orders && res.orders.length) ? res.orders.length : 0
+    const res = await getOrders({ status: searchForm.status, page: currentPage.value, limit: pageSize.value });
+    const orders = res.orders || [];
+    tableData.value = orders;
+    total.value = orders.length;
+
+    // 预加载当前页商品图片
+    const thumbUrls = orders.map(item => getThumbUrl(item.product_image)).filter(Boolean);
+    await preloadImages(thumbUrls);
   } catch (err) {
-    console.error(err)
+    console.error(err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
